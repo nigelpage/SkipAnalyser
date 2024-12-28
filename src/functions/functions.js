@@ -1,21 +1,13 @@
 ﻿/**
- * Add two numbers
+ * Discover skips in worksheets
  * @customfunction
  * @param {string} range range containing skip names in worksheet
  * @param {string} prefix worksheet prefix name (e.g. 'Round ' searches the range in all worksheets that have a name beginning with 'Round ')
- * @returns {string[][]} list of discovered skip names in 'spill down' format.
+ * @returns {string[]} list of discovered skip names in 'spill down' format.
  */
-export function skipnames(range, prefix) {
+export async function skipnames(range, prefix) {
   const skips = [];
   const validSheets = [];
-
-  function insertIfSheetHasPrefix(strarray, name, prefix) {
-    let namePrefix = name.substring(0, prefix.length);
-    if (namePrefix == prefix)
-      return insertIfNotFound(strarray, name);
-
-    return false;
-  }
 
   function insertIfNotFound(strarray, str) {
     if (!strarray.includes(str)) {
@@ -33,18 +25,20 @@ export function skipnames(range, prefix) {
     await context.sync();
 
     sheets.items.forEach((sheet) => {
-      insertIfSheetHasPrefix(validSheets, sheet.name, prefix);
-  
-      let sheetSkips = sheet.getRange(range);
+      let namePrefix = sheet.name.substring(0, prefix.length);
 
-      sheetSkips.load("values");
-      await context.sync();
+      if (namePrefix == prefix) {
+        insertIfNotFound(validSheets, sheet.name);
 
-      sheetSkips.forEach((sheetSkip) => {
-        insertIfNotFound(skips, sheetSkip)
+        let sheetSkips = sheet.getRange(range);
+
+        sheetSkips.load("values");
+
+        sheetSkips.forEach((sheetSkip) => {
+          insertIfNotFound(skips, sheetSkip);
         });
+      }
     });
-
-  return skips;
+    return skips;
   });
-};
+}
