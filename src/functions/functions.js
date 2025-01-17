@@ -1,4 +1,6 @@
-﻿/**
+﻿import * as Excel from "@microsoft/office-js";
+
+/**
  * Discover skips in worksheets
  * @customfunction
  * @param {string} range range containing skip names in worksheet
